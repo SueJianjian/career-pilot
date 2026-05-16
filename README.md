@@ -733,12 +733,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 👥 Team Members
+## 👥 Contributors
 
-- **Harshita Bhansali (Team Leader)**
-- **Gungun Wadhwani (Team Member 1)**
-- **Mohnish Pamnani (Team Member 2)**
-- **Shivang Jaiswal (Team Member 3)**
+This project exists thanks to all the people who contribute. [Become a contributor!](./CONTRIBUTION.md)
+
+<a href="https://github.com/your-username/career-pilot/graphs/contributors">
+  <img src="https://contributors-img.web.app/image?repo=your-username/career-pilot" width="300" />
+</a>
 
 ---
 
