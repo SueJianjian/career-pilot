@@ -1,3 +1,7 @@
+/**
+ * Main Application Component with Route-based Code Splitting
+ * Implements lazy loading for improved performance
+ */
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import Deployments from './pages/Deployments'
 import TemplateGallery from "./pages/TemplateGallery";
