@@ -1,3 +1,10 @@
+# [1.54.0](https://github.com/anurag3407/career-pilot/compare/v1.53.0...v1.54.0) (2026-05-28)
+
+
+### Features
+
+* add Repo Analyzer feature with GitHub repository ingestion and analysis ([30b0438](https://github.com/anurag3407/career-pilot/commit/30b0438a9dc0238e799e18c9e0d52c9201c6a376))
+
 # [1.53.0](https://github.com/anurag3407/career-pilot/compare/v1.52.0...v1.53.0) (2026-05-28)
 
 
