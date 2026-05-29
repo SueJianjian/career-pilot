@@ -1,3 +1,10 @@
+## [1.94.1](https://github.com/anurag3407/career-pilot/compare/v1.94.0...v1.94.1) (2026-05-29)
+
+
+### Bug Fixes
+
+* replace console.log stubs with actual navigation in FAB ([b130555](https://github.com/anurag3407/career-pilot/commit/b130555c1fd0e9f4ff18cf60d7f780b24d8d41ce))
+
 # [1.94.0](https://github.com/anurag3407/career-pilot/compare/v1.93.0...v1.94.0) (2026-05-29)
 
 
