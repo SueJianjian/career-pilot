@@ -1,10 +1,13 @@
+
 /**
  * Main Application Component with Route-based Code Splitting
  * Implements lazy loading for improved performance
  */
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-const Deployments = lazy(() => import('./pages/Deployments'));
-const TemplateGallery = lazy(() => import('./pages/TemplateGallery'));
+import StockTicker from "./components/portfolio/templates/Finance_Corporate/StockTicker";
+import Deployments from './pages/Deployments'
+import TemplateGallery from "./pages/TemplateGallery";
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthProvider';
@@ -20,15 +23,14 @@ import Home from './pages/Home';
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const JobSearch = lazy(() => import('./pages/JobSearch'));
 const ResumeBuilder = lazy(() => import('./pages/ResumeBuilder'));
-const TextToResume = lazy(() => import("./pages/TextToResume"));
-// import TextToResume from './pages/TextToResume';
+import TextToResume from './pages/TextToResume';
 import About from './components/portfolio/templates/Tech_Startup/About';
 import ChatbotPortfolio from "./components/portfolio/templates/Chatbot_Portfolio";
 import GamifiedXP from "./components/portfolio/templates/Gamified_XP";
 import TelescopeZoom from "./components/portfolio/templates/Telescope_Zoom";
+import DayNightCycle from './components/portfolio/templates/Day_Night_Cycle/index.jsx';
+import JobTracker from './pages/JobTracker';
 
-const JobTracker = lazy(() => import("./pages/JobTracker"));
-// import JobTracker from './pages/JobTracker';
 const Community = lazy(() => import('./pages/Community'));
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
@@ -67,25 +69,45 @@ const AdminDashboard = lazy(() => import("./pages/admin/views/AdminDashboard"));
 const AdminUsers = lazy(() => import("./pages/admin/views/AdminUsers"));
 
 import { NotFound } from './pages';
+
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('./pages/TermsOfService'));
 const CookiePolicy = lazy(() => import('./pages/CookiePolicy'));
+import InterviewPrep from './pages/InterviewPrep';
+import UserProfile from './pages/UserProfile';
+import EmailGenerator from './pages/EmailGenerator';
+import LinkedInOptimizer from './pages/LinkedInOptimizer';
+import FellowshipLayout from './pages/fellowship/FellowshipLayout';
+import Onboarding from './pages/fellowship/Onboarding';
+import Challenges from './pages/fellowship/Challenges';
+import Settings from './pages/Settings';
+import ChallengeDetail from './pages/fellowship/ChallengeDetail';
+import CreateChallenge from './pages/fellowship/CreateChallenge';
+import MyProposals from './pages/fellowship/MyProposals';
+import MyChallenges from './pages/fellowship/MyChallenges';
+import ChallengeProposals from './pages/fellowship/ChallengeProposals';
+import Verify from './pages/fellowship/Verify';
+import FellowshipMessages from './pages/fellowship/FellowshipMessages';
+import FellowshipChat from './pages/fellowship/FellowshipChat';
+import SecuritySettings from './pages/SecuritySettings';
+import LinkedInCallback from './pages/LinkedInCallback';
+
+
 import LegalPageErrorBoundary from './components/LegalPageErrorBoundary';
 import RouteErrorBoundary from './components/RouteErrorBoundary';
 
+
 // Hub Imports
 const GitHubDashboard = lazy(() => import('./pages/GitHubDashboard'));
-const RepoAnalyzerLanding = lazy(() => import('./pages/RepoAnalyzer/Landing'));
-const RepoAnalyzerDashboard = lazy(() => import('./pages/RepoAnalyzer/Dashboard'));
-const RepoAnalyzerWorkspace = lazy(() => import('./pages/RepoAnalyzer/Workspace'));
 import ScrollToTop from "./components/ScrollToTop";
 import NorthernFjords from './components/portfolio/templates/Northern_Fjords';
 import RainforestCanopy from './components/portfolio/templates/Rainforest_Canopy/index.jsx';
 import Hero from './components/portfolio/templates/Magazine_Editorial/Hero';
 import TestSocialLinks from './pages/TestSocialLinks';
 
+import RainforestCanopy from './components/portfolio/templates/Rainforest_Canopy/index.jsx';
 
-function LoadingScreen({ label = "Loading..." }) {
+function LoadingScreen({ label }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="flex flex-col items-center gap-4">
@@ -95,6 +117,8 @@ function LoadingScreen({ label = "Loading..." }) {
     </div>
   );
 }
+
+
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
 
@@ -207,7 +231,6 @@ function AppRoutes() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<PublicRoute><Home /></PublicRoute>} />
-        
         <Route path="/login" element={<PublicRoute><Suspense fallback={<LoadingScreen label="Loading Login..." />}><Login /></Suspense></PublicRoute>} />
         <Route path="/register" element={<PublicRoute><Suspense fallback={<LoadingScreen label="Loading Registration..." />}><Register /></Suspense></PublicRoute>} />
         <Route path="/auth/linkedin/callback" element={<Suspense fallback={<LoadingScreen label="Loading callback..." />}><LinkedInCallback /></Suspense>} />
@@ -349,6 +372,27 @@ function AppRoutes() {
     </ProtectedRoute>
   } 
 />
+        <Route 
+  path="/project-visualizer" 
+  element={
+    <ProtectedRoute>
+      <Suspense fallback={<LoadingScreen label="Loading Project Visualizer..." />}>
+        <ProjectVisualizerLanding />
+      </Suspense>
+    </ProtectedRoute>
+  } 
+/>
+        <Route 
+  path="/project-visualizer/dashboard/:sessionId" 
+  element={
+    <ProtectedRoute>
+      <Suspense fallback={<LoadingScreen label="Loading Analysis Dashboard..." />}>
+        <ProjectVisualizerDashboard />
+      </Suspense>
+    </ProtectedRoute>
+  } 
+/>
+
 
         {/* Nested Fellowship Routes */}
         <Route path="/fellowship" element={<ProtectedRoute><FellowshipLayout /></ProtectedRoute>}>
@@ -365,7 +409,9 @@ function AppRoutes() {
           <Route path="messages/:roomId" element={<Suspense fallback={<LoadingScreen label="Loading Chat..." />}><FellowshipChat /></Suspense>} />
         </Route>
 
+
         <Route path="/test-social-links" element={<Suspense fallback={<LoadingScreen label="Loading Test Social Links..." />}><TestSocialLinks /></Suspense>} />
+
 
         {/* Catch-All Route */}
         <Route path="*" element={<NotFound />} />
