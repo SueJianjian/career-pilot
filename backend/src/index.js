@@ -6,7 +6,7 @@ dotenv.config();
 import { createServer } from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
-import compression from 'compression';
+import compressionMiddleware from './middleware/compression.js';
 import rateLimit from 'express-rate-limit';
 import searchRoutes from './routes/search.js';
 import portfolioRoutes from './routes/portfolio.js';
@@ -88,7 +88,7 @@ if (!process.env.OPENAI_API_KEY) {
 
 const app = express();
 app.use(metricsMiddleware);
-app.use(compression());
+app.use(compressionMiddleware);
 const httpServer = createServer(app);
 const PORT = process.env.PORT || 5001;
 
