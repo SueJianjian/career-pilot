@@ -1,3 +1,17 @@
+# [1.154.0](https://github.com/anurag3407/career-pilot/compare/v1.153.0...v1.154.0) (2026-06-05)
+
+
+### Bug Fixes
+
+* remove SMTP credential pattern from docs ([817d091](https://github.com/anurag3407/career-pilot/commit/817d09198905dd63cd2d6ff2e1e2bc3fb792be1b))
+* sanitize env examples and resolve Tailwind utility issues ([96f7d01](https://github.com/anurag3407/career-pilot/commit/96f7d0108395b158fad0a2e82d571cf5a6bd52fc))
+* simplify email password placeholder ([d6da883](https://github.com/anurag3407/career-pilot/commit/d6da883d5afc7080237f150704e9a43c425e75f0))
+
+
+### Features
+
+* **ui:** implement skeleton loaders across the platform ([38f3d78](https://github.com/anurag3407/career-pilot/commit/38f3d78d075baa0a5278d13c6a13666795d90d96))
+
 # [1.153.0](https://github.com/anurag3407/career-pilot/compare/v1.152.0...v1.153.0) (2026-06-05)
 
 
