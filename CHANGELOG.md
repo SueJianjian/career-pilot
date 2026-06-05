@@ -1,3 +1,10 @@
+# [1.163.0](https://github.com/anurag3407/career-pilot/compare/v1.162.1...v1.163.0) (2026-06-05)
+
+
+### Features
+
+* **portfolio:** build Spring Bounce animated portfolio template ([c321012](https://github.com/anurag3407/career-pilot/commit/c3210124f7057aafcc1028a2f46af9d12204f23f))
+
 ## [1.162.1](https://github.com/anurag3407/career-pilot/compare/v1.162.0...v1.162.1) (2026-06-05)
 
 
