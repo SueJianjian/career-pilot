@@ -1,5 +1,18 @@
 export const templates = [
   {
+    "id": "Live_Satellite_Imagery_Feed",
+    "title": "Live Satellite Imagery Feed",
+    "category": "Portfolio",
+    "colorScheme": "Dark",
+    "layout": "Dashboard",
+    "author": "System",
+    "views": 1300,
+    "rating": 4.9,
+    "image": "/templates/Live_Satellite_Imagery_Feed.png",
+    "createdAt": "2026-06-07",
+    "isComplete": true
+  },
+  {
   "id": "Vercel_Deploy",
   "title": "Vercel Deploy",
   "category": "Portfolio",
