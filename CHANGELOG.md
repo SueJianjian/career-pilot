@@ -1,3 +1,10 @@
+# [1.186.0](https://github.com/anurag3407/career-pilot/compare/v1.185.0...v1.186.0) (2026-06-07)
+
+
+### Features
+
+* add interview readiness status and goal dashboard ([aae8839](https://github.com/anurag3407/career-pilot/commit/aae8839cf76c5f4231b259694bb4801842e297d5))
+
 # [1.185.0](https://github.com/anurag3407/career-pilot/compare/v1.184.0...v1.185.0) (2026-06-07)
 
 
