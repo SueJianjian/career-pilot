@@ -1,3 +1,15 @@
+# [1.199.0](https://github.com/anurag3407/career-pilot/compare/v1.198.2...v1.199.0) (2026-06-09)
+
+
+### Bug Fixes
+
+* remove invalid recommended skills calculation ([2d7c292](https://github.com/anurag3407/career-pilot/commit/2d7c2923aefeb4dce73a78ea8bfd76f792058104))
+
+
+### Features
+
+* add recommended skills learning suggestions in skill gap analysis ([8d933d4](https://github.com/anurag3407/career-pilot/commit/8d933d431c008111036f302ee1c2bce04147716f))
+
 ## [1.198.2](https://github.com/anurag3407/career-pilot/compare/v1.198.1...v1.198.2) (2026-06-09)
 
 
