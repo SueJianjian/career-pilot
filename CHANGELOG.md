@@ -1,3 +1,10 @@
+## [1.213.1](https://github.com/anurag3407/career-pilot/compare/v1.213.0...v1.213.1) (2026-06-10)
+
+
+### Bug Fixes
+
+* **security:** remove debug error-reporting script from index.html ([494f874](https://github.com/anurag3407/career-pilot/commit/494f8742243cc3b187ab0ced8806e00ea67e870a))
+
 # [1.213.0](https://github.com/anurag3407/career-pilot/compare/v1.212.0...v1.213.0) (2026-06-10)
 
 
