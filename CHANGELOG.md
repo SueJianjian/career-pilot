@@ -1,4 +1,5 @@
 # 1.0.0 (2026-06-12)
+# [1.224.0](https://github.com/anurag3407/career-pilot/compare/v1.223.0...v1.224.0) (2026-06-12)
 
 
 ### Bug Fixes
@@ -318,6 +319,11 @@
 * **weeklyDigest:** implement actual job staggering instead of misleading delay:0 ([d20af76](https://github.com/homasvikaneria/career-pilot/commit/d20af760f80290117ad3f822ba12071b8ef9db0f))
 * **weeklyDigest:** use _id instead of uid for job payload and worker lookup ([f3c8a0f](https://github.com/homasvikaneria/career-pilot/commit/f3c8a0f799494fbcfa94e17ef9d84d8229acce04))
 * wrap escrow release and challenge update in MongoDB transaction ([#1274](https://github.com/homasvikaneria/career-pilot/issues/1274)) ([12f8ed7](https://github.com/homasvikaneria/career-pilot/commit/12f8ed7ac9bf3a9627c61ef3a4aec47eaf444b25))
+* address codeant-ai review comments ([02c9270](https://github.com/anurag3407/career-pilot/commit/02c92705c32d8775b0621e04b3701d583521454b))
+* address coderabbitai review comments ([1bea4ec](https://github.com/anurag3407/career-pilot/commit/1bea4ecb6b7f99498b77874fbe95fce7db68d053))
+* resolve case-sensitive import error for SectionLabel on Linux runner ([75e56a4](https://github.com/anurag3407/career-pilot/commit/75e56a408f8b102e3b619ff2beb457709a07d350))
+* resolve duplicate Clock import error breaking the build ([144f696](https://github.com/anurag3407/career-pilot/commit/144f696192e9fffd4587f07fafb06d532d15846d))
+* resolve remaining case-sensitive import errors for SectionLabel ([039c432](https://github.com/anurag3407/career-pilot/commit/039c4328f0287fb52600e4e22ecda81118d26f68))
 
 
 ### Features
@@ -723,6 +729,14 @@
 
 * force dark mode in Resume Builder and default to dark theme ([5e7a319](https://github.com/homasvikaneria/career-pilot/commit/5e7a319b63d8d9e5251ce60994a66ecd70bded2f))
 * remove non-mosaic branch changes ([fe3cba8](https://github.com/homasvikaneria/career-pilot/commit/fe3cba8c098c5f6fd28022a07f98e81d843e1601))
+* implement interview history and replay dashboards ([#434](https://github.com/anurag3407/career-pilot/issues/434)) ([7d08f8a](https://github.com/anurag3407/career-pilot/commit/7d08f8a8bdf2a525cd08c7e200eb49123fd60f3f))
+
+# [1.223.0](https://github.com/anurag3407/career-pilot/compare/v1.222.0...v1.223.0) (2026-06-12)
+
+
+### Features
+
+* add notes functionality to Job Tracker cards ([6237a7a](https://github.com/anurag3407/career-pilot/commit/6237a7a79a77f73a1ecae164c9b3acea1fff4ddd))
 
 # [1.222.0](https://github.com/anurag3407/career-pilot/compare/v1.221.0...v1.222.0) (2026-06-11)
 
