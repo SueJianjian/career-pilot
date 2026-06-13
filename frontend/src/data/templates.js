@@ -1,5 +1,17 @@
 export const templates = [
   {
+    "id": "IKEA_Assembly_Manual",
+    "title": "IKEA Assembly Manual",
+    "category": "Portfolio",
+    "colorScheme": "Light",
+    "layout": "Interactive",
+    "author": "System",
+    "views": 0,
+    "rating": 0,
+    "image": "/templates/IKEA_Assembly_Manual.png",
+    "createdAt": "2026-06-13",
+    "isComplete": true
+  },
     "id": "Endless_Runner_Minigame",
     "title": "Endless Runner Minigame",
     "category": "Portfolio",
