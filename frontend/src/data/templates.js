@@ -107,9 +107,6 @@ export const templates = [
 },
 
   {
-  "id": "Vercel_Deploy",
-  "title": "Vercel Deploy",
-{
   "id": "Virtual_Reality_Room_360",
   "title": "Virtual Reality Room 360",
   "category": "Portfolio",
