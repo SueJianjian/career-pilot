@@ -1,10 +1,15 @@
 import 'dotenv/config';
 import express from 'express';
+import collaborationRoutes from './routes/collaboration.js';
+
 import dotenv from "dotenv";
 dotenv.config();
 
+import redisManager from './config/redis.js';
+
 import { createServer } from 'http';
 import cors from 'cors';
+import { cspHeaders } from './middleware/cspHeaders.js';
 import helmet from 'helmet';
 import compressionMiddleware from './middleware/compression.js';
 import rateLimit from 'express-rate-limit';
@@ -20,7 +25,7 @@ import jobAlertRoutes from './routes/jobAlerts.js';
 import communityRoutes from './routes/community.js';
 import fellowshipRoutes from './routes/fellowships.js';
 import interviewRoutes from './routes/interview.js';
-
+import gdprRoutes from './routes/gdpr.js';
 import userProfileRoutes from './routes/userProfile.js';
 import twoFactorRoutes from './routes/twoFactor.js';
 import aiRoutes from './routes/ai.js';
@@ -32,13 +37,13 @@ import bullBoardRoutes from './routes/bullBoard.js';
 
 import inputRoutes from'./routes/input.route.js';
 import recruiterRoutes from '../src/routes/recruiter.routes.js';
+import outreachRoutes from './routes/outreach.route.js';
 
 import { globalErrorHandler } from './middleware/globalErrorHandler.js';
 import {
   metricsMiddleware,
   metricsHandler,
 } from "./middleware/metrics.js";
-import redisManager from './config/redis.js';
 
 import { initializeSocket } from './config/socket.js';
 
@@ -51,6 +56,7 @@ import { connectDB as baseConnectDB } from './config/database.js';
 import { initJobFetcher } from './services/jobFetcher.js';
 import JobAlert from './models/JobAlert.model.js';
 import { initGitHubSyncCron } from './services/portfolioGitHubSync.js';
+import coverLetterRoutes from "./routes/coverLetter.js";
 
 const shouldInitGitHubSyncCron =
   process.env.ENABLE_GITHUB_SYNC_CRON !== 'false' &&
@@ -69,23 +75,26 @@ import {
   initializeDigestQueue,
   startDigestWorker
 } from './services/weeklyDigestService.js';
+import { startOutreachWorker } from './services/outreachQueue.js';
 import { getSafeConfig } from './utils/safeConfig.js';
 import { validateEmailConfig } from './utils/emailConfig.js';
 
-// ============================================================================
-// Configuration validation - Check for required API keys
-// ============================================================================
-if (!process.env.GEMINI_API_KEY) {
-  console.warn('⚠️  GEMINI_API_KEY is not configured - AI features will be unavailable.');
-  console.warn('   Set GEMINI_API_KEY in your .env file to enable Google Gemini features.');
-}
+// ==========================================================================
+// Configuration validation - Check for required API keys (dev only)
+// ==========================================================================
+if (process.env.NODE_ENV === 'development') {
+  if (!process.env.GEMINI_API_KEY) {
+    console.warn('⚠️  GEMINI_API_KEY is not configured - AI features will be unavailable.');
+    console.warn('   Set GEMINI_API_KEY in your .env file to enable Google Gemini features.');
+  }
 
-if (!process.env.GROQ_API_KEY) {
-  console.warn('⚠️  GROQ_API_KEY is not configured - Groq AI provider will not be available.');
-}
+  if (!process.env.GROQ_API_KEY) {
+    console.warn('⚠️  GROQ_API_KEY is not configured - Groq AI provider will not be available.');
+  }
 
-if (!process.env.OPENAI_API_KEY) {
-  console.warn('⚠️  OPENAI_API_KEY is not configured - OpenAI provider will not be available.');
+  if (!process.env.OPENAI_API_KEY) {
+    console.warn('⚠️  OPENAI_API_KEY is not configured - OpenAI provider will not be available.');
+  }
 }
 
 // Validate and normalize CORS origin URLs
@@ -129,17 +138,18 @@ app.use(compressionMiddleware);
 const httpServer = createServer(app);
 const PORT = process.env.PORT || 5001;
 
-// Log a presence-only configuration summary. Raw values are never printed so
-// secrets cannot leak into startup logs or aggregated log output.
-console.log('🔧 Config summary:', getSafeConfig(process.env, [
-  'NODE_ENV',
-  'FRONTEND_URL',
-  'EMAIL_SERVICE_URL',
-  'GEMINI_API_KEY',
-  'GROQ_API_KEY',
-  'OPENAI_API_KEY',
-]));
-
+// Log a presence-only configuration summary in development only.
+// Secrets cannot leak into startup logs or aggregated log output.
+if (process.env.NODE_ENV === 'development') {
+  console.log('✓ Config summary:', getSafeConfig(process.env, [
+    'NODE_ENV',
+    'FRONTEND_URL',
+    'EMAIL_SERVICE_URL',
+    'GEMINI_API_KEY',
+    'GROQ_API_KEY',
+    'OPENAI_API_KEY',
+  ]));
+}
 // CORS configuration - MUST come before helmet
 const allowedOrigins = [
   'http://localhost:5173',
@@ -166,6 +176,8 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-AI-Provider', 'X-AI-Key', 'X-AI-Model', 'X-OpenRouter-Key']
 }));
 
+// Helmet security headers - configured to not interfere with CORS
+app.use(cspHeaders);
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
   crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
@@ -267,6 +279,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/resumes', resumeRoutes);
 app.use('/api/enhance', enhanceRoutes);
+app.use("/api/cover-letter", coverLetterRoutes);
 app.use('/api/fetchjobs', jobsRoutes);
 app.use('/api/job-tracker', jobTrackerRoutes);
 app.use('/api/job-alerts', jobAlertRoutes);
@@ -275,20 +288,24 @@ app.use('/api/fellowship', fellowshipRoutes);
 app.use('/api/interview', interviewRoutes);
 app.use("/api/upload", inputRoutes);
 app.use("/api/recruiter", recruiterRoutes);
+app.use("/api/outreach", outreachRoutes);
 try {
     const paymentRoutes = (await import('./routes/payments.js')).default;
-    app.use('/api/payments', paymentRoutes);
+    app.use('/api/collaboration', collaborationRoutes);
+app.use('/api/payments', paymentRoutes);
     console.log('✅ Payment routes loaded');
 } catch (error) {
     console.warn('⚠️ Payment routes disabled:', error.message);
 }
 app.use('/api/portfolio', portfolioRoutes);
 app.use('/api/user-profiles', userProfileRoutes);
+app.use('/api/gdpr', gdprRoutes);
 app.use('/api/auth/2fa', twoFactorRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/email-tracking', emailTrackingRoutes);
 app.use('/api/analyzer', repoAnalyzerRoutes);
+app.use('/api/project-visualizer', projectVisualizerRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/admin/queues', bullBoardRoutes);
 
@@ -369,6 +386,12 @@ const startServer = async () => {
         '⚠️ Weekly digest scheduler initialization skipped:',
         digestError.message
       );
+    }
+
+    try {
+      startOutreachWorker();
+    } catch (outreachErr) {
+      console.warn('⚠️ Outreach worker initialization skipped:', outreachErr.message);
     }
 
   } catch (error) {
