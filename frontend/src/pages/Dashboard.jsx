@@ -81,6 +81,19 @@ const STATUS_CONFIG = {
   interviewing: { label: 'Interviewing', color: 'bg-secondary/10 text-secondary border border-secondary/20', icon: MessageSquare },
   offered: { label: 'Offered', color: 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20', icon: CheckCircle2 }
 }
+
+const HUB_COLOR_CLASSES = {
+  primary: 'bg-primary/10 border-primary/20 group-hover:bg-primary/15 text-primary',
+  secondary: 'bg-secondary/10 border-secondary/20 group-hover:bg-secondary/15 text-secondary',
+  'emerald-500': 'bg-emerald-500/10 border-emerald-500/20 group-hover:bg-emerald-500/15 text-emerald-500'
+}
+
+const TIP_COLOR_CLASSES = {
+  'amber-500': 'group-hover:text-amber-500',
+  'emerald-500': 'group-hover:text-emerald-500',
+  primary: 'group-hover:text-primary'
+}
+
 const portfolioAnalytics = {
   totalVisits: 1245,
   uniqueVisitors: 876,
@@ -314,8 +327,8 @@ export default function Dashboard() {
 
                       <div>
                         {/* Icon */}
-                        <div className={`w-14 h-14 bg-${hub.color}/10 border border-${hub.color}/20 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-${hub.color}/15 transition-all duration-300`}>
-                          <hub.icon className={`w-7 h-7 text-${hub.color}`} />
+                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-all duration-300 ${HUB_COLOR_CLASSES[hub.color]}`}>
+                          <hub.icon className="w-7 h-7" />
                         </div>
                         
                         {/* Content */}
@@ -740,7 +753,7 @@ export default function Dashboard() {
                 ].map((tip, idx) => (
                   <div key={idx} className="p-8 rounded-[2rem] bg-card border border-border hover:border-primary/30 hover:shadow-xl transition-all group">
                     <div className={`w-14 h-14 bg-muted rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                      <tip.icon className={`w-7 h-7 text-foreground group-hover:text-${tip.color} transition-colors`} />
+                      <tip.icon className={`w-7 h-7 text-foreground transition-colors ${TIP_COLOR_CLASSES[tip.color]}`} />
                     </div>
                     <h3 className="text-xl font-black text-foreground mb-2">{tip.title}</h3>
                     <p className="text-muted-foreground font-medium leading-relaxed">{tip.text}</p>
@@ -754,4 +767,3 @@ export default function Dashboard() {
     </div>
   )
 }
-
