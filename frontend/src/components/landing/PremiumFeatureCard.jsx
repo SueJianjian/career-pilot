@@ -1,6 +1,6 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import React, { useRef } from 'react';
+import { motion, useMotionValue, useMotionTemplate } from 'framer-motion';
+import { ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 
@@ -12,65 +12,97 @@ export default function PremiumFeatureCard({
   badge,
   illustration,
   className,
-  delay = 0
 }) {
+  const cardRef = useRef(null);
+  const mx = useMotionValue(50);
+  const my = useMotionValue(50);
+  const spotlight = useMotionTemplate`radial-gradient(420px circle at ${mx}px ${my}px, rgba(var(--primary-rgb), 0.10), transparent 65%)`;
+
+  const handleMove = (e) => {
+    const rect = cardRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    mx.set(e.clientX - rect.left);
+    my.set(e.clientY - rect.top);
+  };
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5, delay }}
-      className={cn("h-full", className)}
+    <Link
+      ref={cardRef}
+      to={to}
+      onMouseMove={handleMove}
+      className={cn(
+        'group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-card/40 p-7 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1.5 hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10 md:p-8',
+        className
+      )}
     >
-      <Link
-        to={to}
-        className="group relative flex flex-col h-full rounded-3xl bg-card/50 border border-border p-6 md:p-8 overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/10 backdrop-blur-sm"
-      >
-        {/* Animated Gradient Border on Hover */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary opacity-0 group-hover:opacity-10 transition-opacity duration-500" />
-        <div className="absolute inset-0 border-2 border-transparent bg-gradient-to-br from-primary/50 to-secondary/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl [mask-image:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)] [-webkit-mask-composite:xor] [mask-composite:exclude]" />
+      {/* Cursor spotlight */}
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+        style={{ background: spotlight }}
+      />
 
-        {/* Top Header */}
-        <div className="flex items-start justify-between mb-6 relative z-10">
-          <div className="flex items-center gap-4">
-            {Icon && (
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted text-primary group-hover:scale-110 group-hover:bg-primary/20 group-hover:text-primary transition-all duration-300">
-                <Icon className="h-6 w-6" />
-              </div>
-            )}
-            {badge && (
-              <span className="inline-flex items-center rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 px-2.5 py-0.5 text-xs font-semibold text-primary ring-1 ring-inset ring-primary/20">
-                {badge}
-              </span>
-            )}
-          </div>
-          
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted/50 text-muted-foreground opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
-            <ArrowRight className="h-4 w-4" />
-          </div>
-        </div>
+      {/* Gradient border on hover */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+        style={{
+          padding: '1px',
+          background:
+            'linear-gradient(130deg, rgba(var(--primary-rgb),0.6), transparent 40%, rgba(var(--primary-rgb),0.25))',
+          WebkitMask:
+            'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+          WebkitMaskComposite: 'xor',
+          maskComposite: 'exclude',
+        }}
+      />
 
-        {/* Content */}
-        <div className="relative z-10 flex-1">
-          <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-secondary transition-colors">
-            {title}
-          </h3>
-          <p className="text-muted-foreground text-sm md:text-base leading-relaxed">
-            {description}
-          </p>
-        </div>
-
-        {/* Illustration Area */}
-        {illustration && (
-          <div className="relative mt-8 -mx-6 -mb-6 md:-mx-8 md:-mb-8 pt-8 overflow-hidden z-0">
-            {/* Soft fade at the top of illustration */}
-            <div className="absolute top-0 inset-x-0 h-12 bg-gradient-to-b from-background/50 to-transparent z-10" />
-            <div className="opacity-70 group-hover:opacity-100 transition-opacity duration-500 transform group-hover:scale-105">
-              {illustration}
+      {/* Header row */}
+      <div className="relative z-10 mb-6 flex items-start justify-between">
+        <div className="flex items-center gap-4">
+          {Icon && (
+            <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-border bg-muted text-primary transition-all duration-500 group-hover:scale-110 group-hover:border-primary/40 group-hover:bg-primary/15">
+              <Icon className="h-6 w-6" strokeWidth={1.8} />
+              <span className="absolute inset-0 rounded-2xl bg-primary/20 opacity-0 blur-md transition-opacity duration-500 group-hover:opacity-100" />
             </div>
+          )}
+          {badge && (
+            <span className="inline-flex items-center rounded-full bg-linear-to-r from-primary/15 to-secondary/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-primary ring-1 ring-inset ring-primary/25">
+              {badge}
+            </span>
+          )}
+        </div>
+
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-muted/50 text-muted-foreground transition-all duration-500 group-hover:rotate-12 group-hover:border-primary/40 group-hover:bg-primary group-hover:text-primary-foreground">
+          <ArrowUpRight className="h-4 w-4" />
+        </span>
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 flex-1">
+        <h3 className="mb-2.5 text-xl font-black tracking-tight text-foreground md:text-2xl">
+          {title}
+        </h3>
+        <p className="text-sm leading-relaxed text-muted-foreground md:text-base">
+          {description}
+        </p>
+      </div>
+
+      {/* Illustration */}
+      {illustration && (
+        <div className="relative z-0 -mx-7 -mb-7 mt-8 overflow-hidden pt-8 md:-mx-8 md:-mb-8">
+          <div className="absolute inset-x-0 top-0 z-10 h-12 bg-linear-to-b from-card/60 to-transparent" />
+          <div className="opacity-70 transition-all duration-500 group-hover:scale-[1.04] group-hover:opacity-100">
+            {illustration}
           </div>
-        )}
-      </Link>
-    </motion.div>
+        </div>
+      )}
+
+      {/* Bottom accent line */}
+      <span
+        aria-hidden
+        className="absolute inset-x-0 bottom-0 z-10 h-px bg-linear-to-r from-transparent via-primary/60 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+      />
+    </Link>
   );
 }
