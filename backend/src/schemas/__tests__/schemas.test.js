@@ -14,7 +14,7 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { z } from 'zod';
 
-// ─── Auth ────────────────────────────────────────────────────────────────────
+// 鈹€鈹€鈹€ Auth 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 import {
   updateNotificationPrefsSchema,
   registerSchema,
@@ -23,7 +23,7 @@ import {
   resetPasswordSchema,
 } from '../auth.schema.js';
 
-describe('auth.schema — updateNotificationPrefsSchema', () => {
+describe('auth.schema 鈥?updateNotificationPrefsSchema', () => {
   test('accepts valid boolean prefs', () => {
     const result = updateNotificationPrefsSchema.safeParse({
       jobAlerts: true,
@@ -49,7 +49,8 @@ describe('auth.schema — updateNotificationPrefsSchema', () => {
   });
 });
 
-describe('auth.schema — registerSchema', () => {
+
+describe('auth.schema 鈥?registerSchema', () => {
   const valid = { name: 'Alice Example', email: 'alice@example.com', password: 'Passw0rdTest' };
 
   test('accepts a fully valid registration body', () => {
@@ -126,7 +127,7 @@ describe('auth.schema — registerSchema', () => {
   });
 });
 
-describe('auth.schema — loginSchema', () => {
+describe('auth.schema 鈥?loginSchema', () => {
   const valid = { email: 'alice@example.com', password: 'anypassword' };
 
   test('accepts a valid login body', () => {
@@ -171,7 +172,7 @@ describe('auth.schema — loginSchema', () => {
   });
 });
 
-describe('auth.schema — forgotPasswordSchema', () => {
+describe('auth.schema 鈥?forgotPasswordSchema', () => {
   test('accepts a valid email', () => {
     const result = forgotPasswordSchema.safeParse({ email: 'user@example.com' });
     assert.ok(result.success, JSON.stringify(result.error?.issues));
@@ -196,7 +197,7 @@ describe('auth.schema — forgotPasswordSchema', () => {
   });
 });
 
-describe('auth.schema — resetPasswordSchema', () => {
+describe('auth.schema 鈥?resetPasswordSchema', () => {
   const valid = { token: 'a'.repeat(64), newPassword: 'Passw0rdTest' };
 
   test('accepts a valid reset payload', () => {
@@ -234,7 +235,7 @@ describe('auth.schema — resetPasswordSchema', () => {
   });
 });
 
-// ─── Resume ──────────────────────────────────────────────────────────────────
+// 鈹€鈹€鈹€ Resume 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 import {
   createResumeSchema,
   updateResumeSchema,
@@ -244,7 +245,7 @@ import {
   createAtsHistorySchema,
 } from '../resume.schema.js';
 
-describe('resume.schema — createResumeSchema', () => {
+describe('resume.schema 鈥?createResumeSchema', () => {
   test('accepts minimal valid body', () => {
     const result = createResumeSchema.safeParse({ originalText: 'hello' });
     assert.ok(result.success);
@@ -264,19 +265,21 @@ describe('resume.schema — createResumeSchema', () => {
   });
 });
 
-describe('resume.schema — updateResumeSchema', () => {
+describe('resume.schema 鈥?updateResumeSchema', () => {
   test('accepts partial updates', () => {
     const result = updateResumeSchema.safeParse({ title: 'New Title' });
     assert.ok(result.success);
   });
 
   test('rejects empty object', () => {
+    // customSections defaults to [] so the schema now accepts {} but the
+    // downstream `.refine` check still rejects (no field to update).
     const result = updateResumeSchema.safeParse({});
-    assert.ok(!result.success);
+    assert.ok(!result.success, 'empty object should be rejected by the .refine()');
   });
 });
 
-describe('resume.schema — downloadResumeQuerySchema', () => {
+describe('resume.schema 鈥?downloadResumeQuerySchema', () => {
   test('defaults version to enhanced', () => {
     const result = downloadResumeQuerySchema.safeParse({});
     assert.ok(result.success);
@@ -294,7 +297,7 @@ describe('resume.schema — downloadResumeQuerySchema', () => {
   });
 });
 
-describe('resume.schema — createResumeVersionSchema', () => {
+describe('resume.schema 鈥?createResumeVersionSchema', () => {
   test('accepts valid body', () => {
     const result = createResumeVersionSchema.safeParse({
       title: 'v2',
@@ -314,7 +317,7 @@ describe('resume.schema — createResumeVersionSchema', () => {
   });
 });
 
-describe('resume.schema — updateResumeVersionSchema', () => {
+describe('resume.schema 鈥?updateResumeVersionSchema', () => {
   test('accepts valid body', () => {
     const result = updateResumeVersionSchema.safeParse({
       title: 'v2 - updated',
@@ -329,7 +332,7 @@ describe('resume.schema — updateResumeVersionSchema', () => {
   });
 });
 
-describe('resume.schema — createAtsHistorySchema', () => {
+describe('resume.schema 鈥?createAtsHistorySchema', () => {
   test('accepts valid body', () => {
     const result = createAtsHistorySchema.safeParse({
       jobRole: 'SWE',
@@ -371,16 +374,18 @@ describe('resume.schema — createAtsHistorySchema', () => {
 });
 
 
-// ─── Enhance ─────────────────────────────────────────────────────────────────
+// 鈹€鈹€鈹€ Enhance 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 import {
   enhanceResumeSchema,
   resumeTextJobRoleSchema,
   beforeAfterSchema,
   generateEmailSchema,
   optimizeLinkedInSchema,
+  skillGapSchema,
+  tailorResumeSchema,
 } from '../enhance.schema.js';
 
-describe('enhance.schema — enhanceResumeSchema', () => {
+describe('enhance.schema 鈥?enhanceResumeSchema', () => {
   test('accepts valid body with defaults', () => {
     const result = enhanceResumeSchema.safeParse({
       resumeText: 'My resume',
@@ -416,7 +421,7 @@ describe('enhance.schema — enhanceResumeSchema', () => {
   });
 });
 
-describe('enhance.schema — resumeTextJobRoleSchema', () => {
+describe('enhance.schema 鈥?resumeTextJobRoleSchema', () => {
   test('accepts valid body', () => {
     const result = resumeTextJobRoleSchema.safeParse({
       resumeText: 'text',
@@ -433,7 +438,7 @@ describe('enhance.schema — resumeTextJobRoleSchema', () => {
   });
 });
 
-describe('enhance.schema — generateEmailSchema', () => {
+describe('enhance.schema 鈥?generateEmailSchema', () => {
   test('defaults tone to Professional', () => {
     const result = generateEmailSchema.safeParse({
       resume: 'r',
@@ -453,7 +458,7 @@ describe('enhance.schema — generateEmailSchema', () => {
   });
 });
 
-describe('enhance.schema — optimizeLinkedInSchema', () => {
+describe('enhance.schema 鈥?optimizeLinkedInSchema', () => {
   test('rejects profileText > 5000 chars', () => {
     const result = optimizeLinkedInSchema.safeParse({
       profileText: 'x'.repeat(5001),
@@ -470,10 +475,10 @@ describe('enhance.schema — optimizeLinkedInSchema', () => {
   });
 });
 
-// ─── Interview ────────────────────────────────────────────────────────────────
+// 鈹€鈹€鈹€ Interview 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 import { startInterviewSchema, submitAnswerSchema } from '../interview.schema.js';
 
-describe('interview.schema — startInterviewSchema', () => {
+describe('interview.schema 鈥?startInterviewSchema', () => {
   test('accepts valid body with defaults', () => {
     const result = startInterviewSchema.safeParse({
       jobRole: 'SWE',
@@ -500,7 +505,7 @@ describe('interview.schema — startInterviewSchema', () => {
   });
 });
 
-describe('interview.schema — submitAnswerSchema', () => {
+describe('interview.schema 鈥?submitAnswerSchema', () => {
   test('accepts valid body', () => {
     const result = submitAnswerSchema.safeParse({
       questionId: 'q1',
@@ -520,14 +525,14 @@ describe('interview.schema — submitAnswerSchema', () => {
   });
 });
 
-// ─── Job Tracker ─────────────────────────────────────────────────────────────
+// 鈹€鈹€鈹€ Job Tracker 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 import {
   companyResearchSchema,
   trackJobSchema,
   updateTrackedJobSchema,
 } from '../jobTracker.schema.js';
 
-describe('jobTracker.schema — companyResearchSchema', () => {
+describe('jobTracker.schema 鈥?companyResearchSchema', () => {
   test('accepts valid body', () => {
     const result = companyResearchSchema.safeParse({ companyName: 'Google' });
     assert.ok(result.success);
@@ -539,7 +544,7 @@ describe('jobTracker.schema — companyResearchSchema', () => {
   });
 });
 
-describe('jobTracker.schema — trackJobSchema', () => {
+describe('jobTracker.schema 鈥?trackJobSchema', () => {
   test('accepts minimal body', () => {
     const result = trackJobSchema.safeParse({ title: 'SWE', company: 'Acme' });
     assert.ok(result.success);
@@ -566,7 +571,7 @@ describe('jobTracker.schema — trackJobSchema', () => {
   });
 });
 
-describe('jobTracker.schema — updateTrackedJobSchema', () => {
+describe('jobTracker.schema 鈥?updateTrackedJobSchema', () => {
   test('accepts status only', () => {
     const result = updateTrackedJobSchema.safeParse({ status: 'applied' });
     assert.ok(result.success);
@@ -583,10 +588,10 @@ describe('jobTracker.schema — updateTrackedJobSchema', () => {
   });
 });
 
-// ─── Job Alerts ───────────────────────────────────────────────────────────────
+// 鈹€鈹€鈹€ Job Alerts 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 import { createJobAlertSchema, updateJobAlertSchema } from '../jobAlerts.schema.js';
 
-describe('jobAlerts.schema — createJobAlertSchema', () => {
+describe('jobAlerts.schema 鈥?createJobAlertSchema', () => {
   test('accepts minimal body with defaults', () => {
     const result = createJobAlertSchema.safeParse({ title: 'React Jobs' });
     assert.ok(result.success);
@@ -609,10 +614,10 @@ describe('jobAlerts.schema — createJobAlertSchema', () => {
   });
 });
 
-// ─── Payments ────────────────────────────────────────────────────────────────
+// 鈹€鈹€鈹€ Payments 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 import { createOrderSchema, verifyPaymentSchema } from '../payments.schema.js';
 
-describe('payments.schema — createOrderSchema', () => {
+describe('payments.schema 鈥?createOrderSchema', () => {
   test('accepts valid proposalId', () => {
     const result = createOrderSchema.safeParse({ proposalId: 'abc123' });
     assert.ok(result.success);
@@ -624,7 +629,7 @@ describe('payments.schema — createOrderSchema', () => {
   });
 });
 
-describe('payments.schema — verifyPaymentSchema', () => {
+describe('payments.schema 鈥?verifyPaymentSchema', () => {
   test('accepts valid body', () => {
     const result = verifyPaymentSchema.safeParse({
       razorpay_order_id: 'order_123',
@@ -642,10 +647,10 @@ describe('payments.schema — verifyPaymentSchema', () => {
   });
 });
 
-// ─── Two-Factor Auth ──────────────────────────────────────────────────────────
+// 鈹€鈹€鈹€ Two-Factor Auth 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 import { enable2FASchema, tokenOnlySchema, backupCodeSchema } from '../twoFactor.schema.js';
 
-describe('twoFactor.schema — enable2FASchema', () => {
+describe('twoFactor.schema 鈥?enable2FASchema', () => {
   test('accepts valid body', () => {
     const result = enable2FASchema.safeParse({ secret: 'ABCD', token: '123456' });
     assert.ok(result.success);
@@ -657,7 +662,7 @@ describe('twoFactor.schema — enable2FASchema', () => {
   });
 });
 
-describe('twoFactor.schema — tokenOnlySchema', () => {
+describe('twoFactor.schema 鈥?tokenOnlySchema', () => {
   test('accepts token', () => {
     const result = tokenOnlySchema.safeParse({ token: '123456' });
     assert.ok(result.success);
@@ -669,17 +674,17 @@ describe('twoFactor.schema — tokenOnlySchema', () => {
   });
 });
 
-describe('twoFactor.schema — backupCodeSchema', () => {
+describe('twoFactor.schema 鈥?backupCodeSchema', () => {
   test('accepts code', () => {
     const result = backupCodeSchema.safeParse({ code: 'XXXX-YYYY' });
     assert.ok(result.success);
   });
 });
 
-// ─── User Profile ─────────────────────────────────────────────────────────────
-import { updateProfileSchema } from '../userProfile.schema.js';
+// 鈹€鈹€鈹€ User Profile 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+import { updateProfileSchema, setAvatarSchema } from '../userProfile.schema.js';
 
-describe('userProfile.schema — updateProfileSchema', () => {
+describe('userProfile.schema 鈥?updateProfileSchema', () => {
   test('accepts partial update', () => {
     const result = updateProfileSchema.safeParse({ displayName: 'Alice' });
     assert.ok(result.success);
@@ -701,18 +706,127 @@ describe('userProfile.schema — updateProfileSchema', () => {
     const result = updateProfileSchema.safeParse({
       skills: Array.from({ length: 21 }, (_, i) => `skill${i}`),
     });
+  });
+
+  test('accepts all new personal-info fields together', () => {
+    const result = updateProfileSchema.safeParse({
+      avatarUrl: 'https://storage.googleapis.com/x.png',
+      phone: '+1 555 0100',
+      headline: 'Building things',
+      dateOfBirth: '1995-04-12',
+      gender: 'female',
+      company: 'Acme',
+      yearsOfExperience: 7,
+      collegeStudent: false,
+      openToWork: true,
+      education: [{
+        institution: 'MIT',
+        degree: 'B.Sc',
+        field: 'CS',
+        startYear: 2018,
+        endYear: 2022,
+      }],
+      languages: ['English', 'Hindi'],
+      resumeHeadline: 'Backend engineer with 7 yrs experience',
+    });
+    assert.ok(result.success, JSON.stringify(result.error?.issues));
+  });
+
+  test('coerces null dateOfBirth to null', () => {
+    const result = updateProfileSchema.safeParse({ dateOfBirth: null });
+    assert.ok(result.success);
+    assert.equal(result.data.dateOfBirth, null);
+  });
+
+  test('coerces empty string dateOfBirth to null', () => {
+    const result = updateProfileSchema.safeParse({ dateOfBirth: '' });
+    assert.ok(result.success);
+    assert.equal(result.data.dateOfBirth, null);
+  });
+
+  test('rejects future dateOfBirth', () => {
+    const future = new Date();
+    future.setFullYear(future.getFullYear() + 1);
+    const result = updateProfileSchema.safeParse({ dateOfBirth: future.toISOString() });
+    assert.ok(!result.success);
+  });
+
+  test('rejects invalid gender enum value', () => {
+    const result = updateProfileSchema.safeParse({ gender: 'helicopter' });
+    assert.ok(!result.success);
+    assert.ok(result.error.issues.some(e => e.path[0] === 'gender'));
+  });
+
+  test('rejects negative yearsOfExperience', () => {
+    const result = updateProfileSchema.safeParse({ yearsOfExperience: -3 });
+    assert.ok(!result.success);
+  });
+
+  test('rejects yearsOfExperience over 80', () => {
+    const result = updateProfileSchema.safeParse({ yearsOfExperience: 81 });
+    assert.ok(!result.success);
+  });
+
+  test('rejects non-boolean openToWork', () => {
+    const result = updateProfileSchema.safeParse({ openToWork: 'yes' });
+    assert.ok(!result.success);
+  });
+
+  test('rejects education entry with out-of-range year', () => {
+    const result = updateProfileSchema.safeParse({
+      education: [{ institution: 'X', startYear: 1800 }],
+    });
+    assert.ok(!result.success);
+  });
+
+  test('rejects languages array > 20 items', () => {
+    const result = updateProfileSchema.safeParse({
+      languages: Array.from({ length: 21 }, (_, i) => `lang${i}`),
+    });
+    assert.ok(!result.success);
+  });
+
+  test('rejects headline > 120 chars', () => {
+    const result = updateProfileSchema.safeParse({ headline: 'x'.repeat(121) });
+    assert.ok(!result.success);
+  });
+
+  test('rejects resumeHeadline > 300 chars', () => {
+    const result = updateProfileSchema.safeParse({ resumeHeadline: 'x'.repeat(301) });
     assert.ok(!result.success);
   });
 });
 
-// ─── Community ────────────────────────────────────────────────────────────────
+describe('userProfile.schema 鈥?setAvatarSchema', () => {
+  test('accepts a valid URL', () => {
+    const result = setAvatarSchema.safeParse({ avatarUrl: 'https://example.com/a.png' });
+    assert.ok(result.success, JSON.stringify(result.error?.issues));
+  });
+
+  test('rejects missing avatarUrl', () => {
+    const result = setAvatarSchema.safeParse({});
+    assert.ok(!result.success);
+  });
+
+  test('rejects a non-URL avatarUrl', () => {
+    const result = setAvatarSchema.safeParse({ avatarUrl: 'not-a-url' });
+    assert.ok(!result.success);
+  });
+
+  test('rejects an avatarUrl > 500 chars', () => {
+    const result = setAvatarSchema.safeParse({ avatarUrl: `https://example.com/${'x'.repeat(500)}` });
+    assert.ok(!result.success);
+  });
+});
+
+// 鈹€鈹€鈹€ Community 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 import {
   createChannelSchema,
   upsertPostSchema,
   createCommentSchema,
 } from '../community.schema.js';
 
-describe('community.schema — createChannelSchema', () => {
+describe('community.schema 鈥?createChannelSchema', () => {
   test('accepts valid body with defaults', () => {
     const result = createChannelSchema.safeParse({ name: 'General' });
     assert.ok(result.success);
@@ -725,7 +839,7 @@ describe('community.schema — createChannelSchema', () => {
   });
 });
 
-describe('community.schema — upsertPostSchema', () => {
+describe('community.schema 鈥?upsertPostSchema', () => {
   test('accepts valid body', () => {
     const result = upsertPostSchema.safeParse({
       title: 'Hello',
@@ -741,7 +855,7 @@ describe('community.schema — upsertPostSchema', () => {
   });
 });
 
-describe('community.schema — createCommentSchema', () => {
+describe('community.schema 鈥?createCommentSchema', () => {
   test('accepts valid body', () => {
     const result = createCommentSchema.safeParse({ content: 'Nice post!' });
     assert.ok(result.success);
@@ -753,7 +867,7 @@ describe('community.schema — createCommentSchema', () => {
   });
 });
 
-// ─── validate middleware ──────────────────────────────────────────────────────
+// 鈹€鈹€鈹€ validate middleware 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 import { validate } from '../../middleware/validate.js';
 
 describe('validate middleware', () => {
@@ -799,5 +913,34 @@ describe('validate middleware', () => {
       assert.equal(req.query.name, 'Bob');
       done();
     });
+  });
+});
+
+describe('enhance.schema - shared job description limits', () => {
+  test('generateEmailSchema rejects oversized job descriptions', () => {
+    const result = generateEmailSchema.safeParse({
+      resume: 'r',
+      jobDesc: 'A'.repeat(20001),
+    });
+    assert.ok(!result.success);
+    assert.ok(result.error.issues.some((issue) => issue.path[0] === 'jobDesc'));
+  });
+
+  test('skillGapSchema rejects oversized job descriptions', () => {
+    const result = skillGapSchema.safeParse({
+      resumeText: 'Resume text',
+      jobDescription: 'A'.repeat(20001),
+    });
+    assert.ok(!result.success);
+    assert.ok(result.error.issues.some((issue) => issue.path[0] === 'jobDescription'));
+  });
+
+  test('tailorResumeSchema accepts the shared global limit', () => {
+    const result = tailorResumeSchema.safeParse({
+      resumeText: 'Resume text',
+      jobDescription: 'A'.repeat(20000),
+      jobRole: 'Engineer',
+    });
+    assert.ok(result.success, JSON.stringify(result.error?.issues));
   });
 });
