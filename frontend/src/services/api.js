@@ -1,7 +1,7 @@
 import { auth } from '../config/firebase'
 import { decryptKey } from '../utils/encryption'
-import { useAIConfigStore } from '../stores/useAIConfigStore'
-import { useGithubConfigStore } from '../stores/useGithubConfigStore'
+import { useAIConfigStore } from '../stores/useAIConfigStore.js'
+import { useGithubConfigStore } from '../stores/useGithubConfigStore.js'
 
 export const apiEvents = new EventTarget();
 
