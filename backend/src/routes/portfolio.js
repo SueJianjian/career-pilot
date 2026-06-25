@@ -18,6 +18,9 @@ import { generateRobotsTxt, generateSitemapXml } from '../utils/sitemapGenerator
 import { analyzeAccessibility } from '../services/accessibilityChecker.js';
 import PortfolioVersion from '../models/PortfolioVersion.model.js';
 import UserProfile from '../models/UserProfile.model.js';
+import {
+  invalidateProfileCache,
+} from '../services/profileCache.js';
 import { getObjectDiff, applyDiff } from '../utils/diff.js';
 
 const router = express.Router();
@@ -256,7 +259,7 @@ router.post('/deploy', verifyToken, asyncHandler(async (req, res) => {
     );
   } catch (dbErr) {
     console.error('DB save after deploy error:', dbErr);
-    // Don't fail the response — the site IS live, even if DB save had an issue
+    // Don't fail the response 鈥?the site IS live, even if DB save had an issue
   }
 
   res.status(200).json({
@@ -415,13 +418,6 @@ router.put('/:slug', verifyToken, validatePortfolioSlug, validatePortfolioConten
   if (!portfolio) {
     throw new ApiError(404, `Portfolio "${slug}" not found.`);
   }
-res.status(200).json({
-  success: true,
-  message: 'Portfolio updated successfully.',
-  data: portfolio,
-});
-
-
   res.status(200).json({
     success: true,
     message: 'Portfolio updated successfully.',
@@ -639,6 +635,7 @@ router.post('/:id/restore/:versionId', verifyToken, asyncHandler(async (req, res
     if (Object.keys(update.$unset).length === 0) delete update.$unset;
 
     await UserProfile.findOneAndUpdate({ uid: id }, update, { upsert: true });
+    await invalidateProfileCache(id);
   } else {
     let portfolioVersions = inMemoryStore.get(id) || [];
     newVersionNumber = (portfolioVersions[portfolioVersions.length - 1]?.version || 0) + 1;
