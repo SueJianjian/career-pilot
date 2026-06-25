@@ -1,5 +1,5 @@
 import express from 'express';
-import { enhanceResume, generateSummary, suggestImprovements, analyzeATSScore, analyzeResumeComprehensive, analyzeBulletPoints, generateBeforeAfter, getVerbLists, getSystemPrompt, analyzeSkillGap } from '../config/langchain.js';
+import { enhanceResume, generateSummary, suggestImprovements, analyzeATSScore, analyzeResumeComprehensive, analyzeBulletPoints, generateBeforeAfter, getVerbLists, getSystemPrompt, analyzeSkillGap, translateResume, tailorResume } from '../config/langchain.js';
 import { computeATSScore } from '../services/atsScorer.js';
 import { generateEmails } from '../services/emailGeneratorService.js';
 import { predictTrajectory } from '../services/ai/careerTrajectory.js';
@@ -11,6 +11,7 @@ import { aiRateLimiter } from '../middleware/rateLimiter.js';
 import { createSSEStream } from '../middleware/stream.js';
 import { validate } from '../middleware/validate.js';
 import { genAI } from '../config/genAI.js';
+import { assertJobDescriptionWithinLimit } from '../utils/jobDescription.js';
 import {
   enhanceResumeSchema,
   resumeTextJobRoleSchema,
@@ -19,6 +20,8 @@ import {
   optimizeLinkedInSchema,
   resumeScoreSchema,
   skillGapSchema,
+  translateResumeSchema,
+  tailorResumeSchema,
 } from '../schemas/enhance.schema.js';
 
 const router = express.Router();
@@ -44,7 +47,7 @@ router.post('/resume-score', verifyToken, extractAIProvider, aiRateLimiter, vali
 
     // 2. Get qualitative feedback via AI
     const prompt = `Analyze this resume for a ${targetRole} position and return a JSON object with EXACTLY these fields:
-- sections: object with keys "summary", "skills", "experience", "education", "projects" — each containing:
+- sections: object with keys "summary", "skills", "experience", "education", "projects" 鈥?each containing:
     - feedback (string, one concise sentence of constructive feedback)
 - topSuggestions: array of exactly 3 strings, each a specific actionable improvement tip
 
@@ -71,20 +74,10 @@ Return ONLY valid JSON. No markdown fences, no extra text.`;
       qualitativeData = JSON.parse(text);
     } catch (parseErr) {
       console.error('Resume score JSON parse error:', parseErr, 'Raw text:', text);
-      qualitativeData = {
-        sections: {
-          summary: { feedback: 'Consider making your summary more impactful.' },
-          skills: { feedback: 'Ensure skills match the target job description.' },
-          experience: { feedback: 'Use strong action verbs and metrics.' },
-          education: { feedback: 'Include relevant coursework or GPA if applicable.' },
-          projects: { feedback: 'Detail the technologies used and outcomes.' }
-        },
-        topSuggestions: [
-          'Add more quantifiable metrics to your experience.',
-          'Tailor keywords to the specific job role.',
-          'Ensure formatting is clean and easy to read.'
-        ]
-      };
+      throw new ApiError(
+        502,
+        'AI service returned an invalid response. Please try again in a moment.'
+      );
     }
 
     // 3. Map into the format expected by the frontend
@@ -365,6 +358,7 @@ router.post('/generate-email', verifyToken, extractAIProvider, aiRateLimiter, va
     throw new ApiError(400, 'Resume and Job Description are required');
   }
   assertResumeTextWithinLimit(resume);
+  assertJobDescriptionWithinLimit(jobDesc, 'jobDesc');
 
   try {
     const result = await generateEmails(resume, jobDesc, tone || 'Professional', req.aiProvider);
@@ -403,6 +397,7 @@ router.post('/optimize-linkedin', verifyToken, extractAIProvider, aiRateLimiter,
 router.post('/skill-gap', verifyToken, extractAIProvider, aiRateLimiter, validate(skillGapSchema), asyncHandler(async (req, res) => {
   const { resumeText, jobDescription } = req.body;
   assertResumeTextWithinLimit(resumeText);
+  assertJobDescriptionWithinLimit(jobDescription);
 
   try {
     const result = await analyzeSkillGap(resumeText, jobDescription, req.aiProvider);
@@ -416,6 +411,57 @@ router.post('/skill-gap', verifyToken, extractAIProvider, aiRateLimiter, validat
   } catch (error) {
     console.error('Skill gap analysis error:', error);
     throw new ApiError(500, 'Failed to analyze skill gap. Please try again.');
+  }
+}));
+
+// Translate a resume into a target language while preserving formatting.
+// Powers the "Translate" tool in the resume viewer 鈥?useful for international
+// job applications.
+router.post('/translate', verifyToken, extractAIProvider, aiRateLimiter, validate(translateResumeSchema), asyncHandler(async (req, res) => {
+  const { resumeText, targetLanguage, sourceLanguage } = req.body;
+  assertResumeTextWithinLimit(resumeText);
+
+  try {
+    const result = await translateResume(resumeText, targetLanguage, sourceLanguage, req.aiProvider);
+
+    res.json({
+      success: true,
+      data: {
+        translatedText: result.translatedText,
+        targetLanguage: result.targetLanguage,
+        sourceLanguage: result.sourceLanguage,
+      },
+      provider: result.provider,
+      providerSource: req.aiProviderSource,
+    });
+  } catch (error) {
+    console.error('Resume translation error:', error);
+    throw new ApiError(500, 'Failed to translate resume. Please try again.');
+  }
+}));
+
+// One-Click Resume Tailor 鈥?rewrites the resume to match a job description.
+// Powers the "Tailor to this job" tool in the resume viewer.
+router.post('/tailor', verifyToken, extractAIProvider, aiRateLimiter, validate(tailorResumeSchema), asyncHandler(async (req, res) => {
+  const { resumeText, jobDescription, jobRole } = req.body;
+  assertResumeTextWithinLimit(resumeText);
+  assertJobDescriptionWithinLimit(jobDescription);
+
+  try {
+    const result = await tailorResume(resumeText, jobDescription, jobRole, req.aiProvider);
+
+    res.json({
+      success: true,
+      data: {
+        tailoredText: result.tailoredText,
+        jobRole: jobRole || null,
+      },
+      provider: result.provider,
+      providerSource: req.aiProviderSource,
+    });
+  } catch (error) {
+    console.error('Resume tailoring error:', error);
+    throw new ApiError(500, 'Failed to tailor resume. Please try again.');
   }
 }));
 
@@ -549,7 +595,7 @@ router.post('/career-trajectory', verifyToken, extractAIProvider, aiRateLimiter,
     throw new ApiError(400, 'resumeData must include at least currentRole or skills');
   }
 
-  // Sanitise inputs — never forward raw resumeText to the AI (token cost)
+  // Sanitise inputs 鈥?never forward raw resumeText to the AI (token cost)
   // Validate and sanitise each field to enforce strict token/cost bounds
   const sanitisedData = {
     // Cap role to 100 chars to prevent prompt injection / token bloat
@@ -563,7 +609,7 @@ router.post('/career-trajectory', verifyToken, extractAIProvider, aiRateLimiter,
           .slice(0, 10)
       : [],
 
-    // Reject NaN, Infinity, and negative values — clamp to safe range [0, 50]
+    // Reject NaN, Infinity, and negative values 鈥?clamp to safe range [0, 50]
     yearsOfExperience:
       typeof yearsOfExperience === 'number' &&
       Number.isFinite(yearsOfExperience) &&
