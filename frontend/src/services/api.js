@@ -1,7 +1,5 @@
 import { auth } from '../config/firebase'
 import { decryptKey } from '../utils/encryption'
-import { useAIConfigStore } from '../stores/useAIConfigStore.js'
-import { useGithubConfigStore } from '../stores/useGithubConfigStore.js'
 
 export const apiEvents = new EventTarget();
 
@@ -29,31 +27,7 @@ const headers = {
   'Content-Type': 'application/json'
 }
 
-// Inject GitHub BYOK token if present (PAT stored in encrypted localStorage)
-try {
-  const ghState = useGithubConfigStore.getState()
-  const decryptedPat = ghState.getDecryptedToken()
-  if (decryptedPat) headers['X-GitHub-Token'] = decryptedPat
-} catch (e) {
-  // store not yet available
-}
-
 if (includeAI) {
-  // Try the new Zustand store first
-  try {
-    const aiConfig = useAIConfigStore.getState().getActiveConfig()
-
-    if (aiConfig) {
-      if (aiConfig.provider) headers['X-AI-Provider'] = aiConfig.provider
-      if (aiConfig.apiKey) headers['X-AI-Key'] = aiConfig.apiKey
-      if (aiConfig.model) headers['X-AI-Model'] = aiConfig.model
-
-      return headers
-    }
-  } catch (e) {
-    // Store not available, fall through to legacy
-  }
-
   // Legacy fallback
   const aiConfigStr = localStorage.getItem('aiConfig')
 
@@ -773,7 +747,15 @@ export const githubPortfolioApi = {
 
 export const githubReadmeApi = {
   async generate(prompt) {
-    const headers = await getAuthHeaders({ includeAI: false })
+    const user = auth?.currentUser
+    if (!user && !import.meta.env.DEV) throw new Error('Not authenticated')
+
+    const token = user ? await user.getIdToken() : 'mock-dev-token'
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    }
+
     const response = await fetch(`${API_BASE}/github/readme/generate`, {
       method: 'POST',
       headers,
