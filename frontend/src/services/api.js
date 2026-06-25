@@ -6,7 +6,8 @@ export const apiEvents = new EventTarget();
 const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 
 // Helper to get auth headers
-async function getAuthHeaders() {
+async function getAuthHeaders(options = {}) {
+const { includeAI = true } = options
 const user = auth?.currentUser
 
 if (!user) {
@@ -36,41 +37,43 @@ try {
   // store not yet available
 }
 
-// Try the new Zustand store first
-try {
-  const { useAIConfigStore } = await import('../stores/useAIConfigStore')
-
-  const aiConfig = useAIConfigStore.getState().getActiveConfig()
-
-  if (aiConfig) {
-    if (aiConfig.provider) headers['X-AI-Provider'] = aiConfig.provider
-    if (aiConfig.apiKey) headers['X-AI-Key'] = aiConfig.apiKey
-    if (aiConfig.model) headers['X-AI-Model'] = aiConfig.model
-
-    return headers
-  }
-} catch (e) {
-  // Store not available, fall through to legacy
-}
-
-// Legacy fallback
-const aiConfigStr = localStorage.getItem('aiConfig')
-
-if (aiConfigStr) {
+if (includeAI) {
+  // Try the new Zustand store first
   try {
-    const aiConfig = JSON.parse(aiConfigStr)
+    const { useAIConfigStore } = await import('../stores/useAIConfigStore')
 
-    if (aiConfig.provider) headers['X-AI-Provider'] = aiConfig.provider
-    if (aiConfig.apiKey) headers['X-AI-Key'] = decryptKey(aiConfig.apiKey)
-    if (aiConfig.model) headers['X-AI-Model'] = aiConfig.model
+    const aiConfig = useAIConfigStore.getState().getActiveConfig()
+
+    if (aiConfig) {
+      if (aiConfig.provider) headers['X-AI-Provider'] = aiConfig.provider
+      if (aiConfig.apiKey) headers['X-AI-Key'] = aiConfig.apiKey
+      if (aiConfig.model) headers['X-AI-Model'] = aiConfig.model
+
+      return headers
+    }
   } catch (e) {
-    console.error(e)
+    // Store not available, fall through to legacy
   }
-} else {
-  const openRouterKey = localStorage.getItem('openRouterApiKey')
 
-  if (openRouterKey) {
-    headers['X-OpenRouter-Key'] = decryptKey(openRouterKey)
+  // Legacy fallback
+  const aiConfigStr = localStorage.getItem('aiConfig')
+
+  if (aiConfigStr) {
+    try {
+      const aiConfig = JSON.parse(aiConfigStr)
+
+      if (aiConfig.provider) headers['X-AI-Provider'] = aiConfig.provider
+      if (aiConfig.apiKey) headers['X-AI-Key'] = decryptKey(aiConfig.apiKey)
+      if (aiConfig.model) headers['X-AI-Model'] = aiConfig.model
+    } catch (e) {
+      console.error(e)
+    }
+  } else {
+    const openRouterKey = localStorage.getItem('openRouterApiKey')
+
+    if (openRouterKey) {
+      headers['X-OpenRouter-Key'] = decryptKey(openRouterKey)
+    }
   }
 }
 
@@ -764,6 +767,18 @@ export const githubPortfolioApi = {
     const response = await fetch(`${API_BASE}/portfolio/github/${id}`, {
       method: 'DELETE',
       headers,
+    })
+    return handleResponse(response)
+  },
+}
+
+export const githubReadmeApi = {
+  async generate(prompt) {
+    const headers = await getAuthHeaders({ includeAI: false })
+    const response = await fetch(`${API_BASE}/github/readme/generate`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ prompt }),
     })
     return handleResponse(response)
   },

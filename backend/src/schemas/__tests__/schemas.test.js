@@ -22,6 +22,7 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
 } from '../auth.schema.js';
+import { generateReadmeSchema } from '../github.schema.js';
 
 describe('auth.schema — updateNotificationPrefsSchema', () => {
   test('accepts valid boolean prefs', () => {
@@ -910,5 +911,26 @@ describe('validate middleware', () => {
       assert.equal(req.query.name, 'Bob');
       done();
     });
+  });
+});
+
+describe('github.schema 鈥?generateReadmeSchema', () => {
+  test('accepts a meaningful README prompt', () => {
+    const result = generateReadmeSchema.safeParse({
+      prompt: 'A React dashboard for tracking crypto portfolios with live price updates and charts.',
+    });
+    assert.ok(result.success, JSON.stringify(result.error?.issues));
+  });
+
+  test('rejects prompts that are too short', () => {
+    const result = generateReadmeSchema.safeParse({ prompt: 'too short' });
+    assert.ok(!result.success);
+    assert.ok(result.error.issues.some((issue) => issue.path[0] === 'prompt'));
+  });
+
+  test('rejects prompts longer than 5,000 characters', () => {
+    const result = generateReadmeSchema.safeParse({ prompt: 'A'.repeat(5001) });
+    assert.ok(!result.success);
+    assert.ok(result.error.issues.some((issue) => issue.path[0] === 'prompt'));
   });
 });
