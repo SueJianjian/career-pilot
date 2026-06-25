@@ -1,5 +1,7 @@
 import { auth } from '../config/firebase'
 import { decryptKey } from '../utils/encryption'
+import { useAIConfigStore } from '../stores/useAIConfigStore'
+import { useGithubConfigStore } from '../stores/useGithubConfigStore'
 
 export const apiEvents = new EventTarget();
 
@@ -29,7 +31,6 @@ const headers = {
 
 // Inject GitHub BYOK token if present (PAT stored in encrypted localStorage)
 try {
-  const { useGithubConfigStore } = await import('../stores/useGithubConfigStore.js')
   const ghState = useGithubConfigStore.getState()
   const decryptedPat = ghState.getDecryptedToken()
   if (decryptedPat) headers['X-GitHub-Token'] = decryptedPat
@@ -40,8 +41,6 @@ try {
 if (includeAI) {
   // Try the new Zustand store first
   try {
-    const { useAIConfigStore } = await import('../stores/useAIConfigStore.js')
-
     const aiConfig = useAIConfigStore.getState().getActiveConfig()
 
     if (aiConfig) {
