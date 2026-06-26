@@ -1,6 +1,9 @@
 import 'dotenv/config';
 import express from 'express';
 import collaborationRoutes from './routes/collaboration.js';
+import roastRoutes from './routes/roast.js';
+import portfolioGithubRoutes from './routes/portfolioGithub.js';
+import githubReadmeRoutes from './routes/githubReadme.js';
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -38,6 +41,7 @@ import bullBoardRoutes from './routes/bullBoard.js';
 import inputRoutes from'./routes/input.route.js';
 import recruiterRoutes from '../src/routes/recruiter.routes.js';
 import outreachRoutes from './routes/outreach.route.js';
+import bugsRoutes from './routes/bugs.js';
 
 import { globalErrorHandler } from './middleware/globalErrorHandler.js';
 import {
@@ -136,7 +140,7 @@ const app = express();
 app.use(metricsMiddleware);
 app.use(compressionMiddleware);
 const httpServer = createServer(app);
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5000;
 
 // Log a presence-only configuration summary in development only.
 // Secrets cannot leak into startup logs or aggregated log output.
@@ -158,7 +162,9 @@ const allowedOrigins = [
   validateOriginUrl(process.env.FRONTEND_URL),
 ].filter(Boolean);
 
-console.log('🔧 Allowed origins:', allowedOrigins);
+if (process.env.NODE_ENV === 'development') {
+  console.log('🔧 Allowed origins:', allowedOrigins);
+}
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -173,7 +179,7 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-AI-Provider', 'X-AI-Key', 'X-AI-Model', 'X-OpenRouter-Key']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-AI-Provider', 'X-AI-Key', 'X-AI-Model', 'X-OpenRouter-Key', 'X-GitHub-Token']
 }));
 
 // Helmet security headers - configured to not interfere with CORS
@@ -268,7 +274,6 @@ app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV
   });
 });
 
@@ -279,6 +284,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/resumes', resumeRoutes);
 app.use('/api/enhance', enhanceRoutes);
+app.use('/api/roast', roastRoutes);
 app.use("/api/cover-letter", coverLetterRoutes);
 app.use('/api/fetchjobs', jobsRoutes);
 app.use('/api/job-tracker', jobTrackerRoutes);
@@ -289,6 +295,7 @@ app.use('/api/interview', interviewRoutes);
 app.use("/api/upload", inputRoutes);
 app.use("/api/recruiter", recruiterRoutes);
 app.use("/api/outreach", outreachRoutes);
+app.use("/api/bugs", bugsRoutes);
 try {
     const paymentRoutes = (await import('./routes/payments.js')).default;
     app.use('/api/collaboration', collaborationRoutes);
@@ -298,6 +305,8 @@ app.use('/api/payments', paymentRoutes);
     console.warn('⚠️ Payment routes disabled:', error.message);
 }
 app.use('/api/portfolio', portfolioRoutes);
+app.use('/api/portfolio/github', portfolioGithubRoutes);
+app.use('/api/github/readme', githubReadmeRoutes);
 app.use('/api/user-profiles', userProfileRoutes);
 app.use('/api/gdpr', gdprRoutes);
 app.use('/api/auth/2fa', twoFactorRoutes);
