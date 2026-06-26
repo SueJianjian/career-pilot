@@ -69,12 +69,15 @@ jobs:
   snyk:
     name: Snyk Vulnerability Scan
     runs-on: ubuntu-latest
-    if: ${{ secrets.SNYK_TOKEN != '' }}
+    env:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
     steps:
       - name: Checkout repository
+        if: env.SNYK_TOKEN != ''
         uses: actions/checkout@v4
 
       - name: Set up Node.js
+        if: env.SNYK_TOKEN != ''
         uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -82,14 +85,14 @@ jobs:
           cache-dependency-path: backend/package-lock.json
 
       - name: Install dependencies
+        if: env.SNYK_TOKEN != ''
         working-directory: ./backend
         run: npm install --legacy-peer-deps --prefer-offline
 
       - name: Run Snyk to check for vulnerabilities
+        if: env.SNYK_TOKEN != ''
         uses: snyk/actions/node@master
         continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: >
             --file=backend/package.json
@@ -98,19 +101,23 @@ jobs:
             --json-file-output=snyk-results.json
 
       - name: Upload Snyk SARIF to GitHub Security tab
-        if: always() && hashFiles('snyk-results.sarif') != ''
+        if: env.SNYK_TOKEN != '' && always() && hashFiles('snyk-results.sarif') != ''
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: snyk-results.sarif
           category: snyk
 
       - name: Upload Snyk JSON report
-        if: always() && hashFiles('snyk-results.json') != ''
+        if: env.SNYK_TOKEN != '' && always() && hashFiles('snyk-results.json') != ''
         uses: actions/upload-artifact@v4
         with:
           name: snyk-report
           path: snyk-results.json
           retention-days: 30
+
+      - name: Skip Snyk scan when token is unavailable
+        if: env.SNYK_TOKEN == ''
+        run: echo "SNYK_TOKEN is not configured for this repository. Skipping Snyk scan."
 
   dependency-review:
     name: GitHub Dependency Review
