@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import express from 'express';
 import collaborationRoutes from './routes/collaboration.js';
+import roastRoutes from './routes/roast.js';
+import portfolioGithubRoutes from './routes/portfolioGithub.js';
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -38,6 +40,7 @@ import bullBoardRoutes from './routes/bullBoard.js';
 import inputRoutes from'./routes/input.route.js';
 import recruiterRoutes from '../src/routes/recruiter.routes.js';
 import outreachRoutes from './routes/outreach.route.js';
+import bugsRoutes from './routes/bugs.js';
 
 import { globalErrorHandler } from './middleware/globalErrorHandler.js';
 import {
@@ -84,16 +87,16 @@ import { validateEmailConfig } from './utils/emailConfig.js';
 // ==========================================================================
 if (process.env.NODE_ENV === 'development') {
   if (!process.env.GEMINI_API_KEY) {
-    console.warn('⚠️  GEMINI_API_KEY is not configured - AI features will be unavailable.');
+    console.warn('鈿狅笍  GEMINI_API_KEY is not configured - AI features will be unavailable.');
     console.warn('   Set GEMINI_API_KEY in your .env file to enable Google Gemini features.');
   }
 
   if (!process.env.GROQ_API_KEY) {
-    console.warn('⚠️  GROQ_API_KEY is not configured - Groq AI provider will not be available.');
+    console.warn('鈿狅笍  GROQ_API_KEY is not configured - Groq AI provider will not be available.');
   }
 
   if (!process.env.OPENAI_API_KEY) {
-    console.warn('⚠️  OPENAI_API_KEY is not configured - OpenAI provider will not be available.');
+    console.warn('鈿狅笍  OPENAI_API_KEY is not configured - OpenAI provider will not be available.');
   }
 }
 
@@ -136,12 +139,12 @@ const app = express();
 app.use(metricsMiddleware);
 app.use(compressionMiddleware);
 const httpServer = createServer(app);
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5000;
 
 // Log a presence-only configuration summary in development only.
 // Secrets cannot leak into startup logs or aggregated log output.
 if (process.env.NODE_ENV === 'development') {
-  console.log('✓ Config summary:', getSafeConfig(process.env, [
+  console.log('鉁?Config summary:', getSafeConfig(process.env, [
     'NODE_ENV',
     'FRONTEND_URL',
     'EMAIL_SERVICE_URL',
@@ -158,7 +161,9 @@ const allowedOrigins = [
   validateOriginUrl(process.env.FRONTEND_URL),
 ].filter(Boolean);
 
-console.log('🔧 Allowed origins:', allowedOrigins);
+if (process.env.NODE_ENV === 'development') {
+  console.log('馃敡 Allowed origins:', allowedOrigins);
+}
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -167,13 +172,13 @@ app.use(cors({
     if (allowedOrigins.includes(normalizedOrigin)) {
       callback(null, true);
     } else {
-      console.log('❌ CORS blocked origin:', origin, '| Allowed:', allowedOrigins);
+      console.log('鉂?CORS blocked origin:', origin, '| Allowed:', allowedOrigins);
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-AI-Provider', 'X-AI-Key', 'X-AI-Model', 'X-OpenRouter-Key']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-AI-Provider', 'X-AI-Key', 'X-AI-Model', 'X-OpenRouter-Key', 'X-GitHub-Token']
 }));
 
 // Helmet security headers - configured to not interfere with CORS
@@ -268,7 +273,6 @@ app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV
   });
 });
 
@@ -279,6 +283,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/resumes', resumeRoutes);
 app.use('/api/enhance', enhanceRoutes);
+app.use('/api/roast', roastRoutes);
 app.use("/api/cover-letter", coverLetterRoutes);
 app.use('/api/fetchjobs', jobsRoutes);
 app.use('/api/job-tracker', jobTrackerRoutes);
@@ -289,15 +294,17 @@ app.use('/api/interview', interviewRoutes);
 app.use("/api/upload", inputRoutes);
 app.use("/api/recruiter", recruiterRoutes);
 app.use("/api/outreach", outreachRoutes);
+app.use("/api/bugs", bugsRoutes);
+app.use('/api/collaboration', collaborationRoutes);
 try {
     const paymentRoutes = (await import('./routes/payments.js')).default;
-    app.use('/api/collaboration', collaborationRoutes);
 app.use('/api/payments', paymentRoutes);
-    console.log('✅ Payment routes loaded');
+    console.log('鉁?Payment routes loaded');
 } catch (error) {
-    console.warn('⚠️ Payment routes disabled:', error.message);
+    console.warn('鈿狅笍 Payment routes disabled:', error.message);
 }
 app.use('/api/portfolio', portfolioRoutes);
+app.use('/api/portfolio/github', portfolioGithubRoutes);
 app.use('/api/user-profiles', userProfileRoutes);
 app.use('/api/gdpr', gdprRoutes);
 app.use('/api/auth/2fa', twoFactorRoutes);
@@ -321,30 +328,30 @@ const startServer = async () => {
     // send failures.
     const emailStatus = validateEmailConfig(process.env);
     if (emailStatus.enabled) {
-      console.log(`📧 ${emailStatus.message}`);
+      console.log(`馃摟 ${emailStatus.message}`);
     } else {
-      console.warn(`⚠️ ${emailStatus.message}`);
+      console.warn(`鈿狅笍 ${emailStatus.message}`);
     }
 
     await connectDB();
 
     httpServer.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`🔗 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
+      console.log(`馃殌 Server running on port ${PORT}`);
+      console.log(`馃搷 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`馃敆 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
     });
 
     try {
       await initializeDefaultChannels();
-      console.log('💬 Community channels initialized');
+      console.log('馃挰 Community channels initialized');
     } catch (channelError) {
-      console.warn('⚠️ Could not initialize default channels:', channelError.message);
+      console.warn('鈿狅笍 Could not initialize default channels:', channelError.message);
     }
 
     try {
       await initializePostScheduler();
     } catch (schedulerError) {
-      console.warn('⚠️ Post scheduler initialization skipped:', schedulerError.message);
+      console.warn('鈿狅笍 Post scheduler initialization skipped:', schedulerError.message);
     }
 
     const allowDevDbMutations = process.env.ALLOW_DEV_DB_MUTATIONS === 'true';
@@ -357,14 +364,14 @@ const startServer = async () => {
             { $set: { userEmail: testEmail } }
           );
           if (result.modifiedCount > 0) {
-            console.log(`📧 Updated ${result.modifiedCount} alerts to use email: ${testEmail}`);
+            console.log(`馃摟 Updated ${result.modifiedCount} alerts to use email: ${testEmail}`);
           }
         }
       } catch (err) {
-        console.warn('⚠️ Could not update dev alert emails:', err.message);
+        console.warn('鈿狅笍 Could not update dev alert emails:', err.message);
       }
     } else if (process.env.NODE_ENV === 'development' && !allowDevDbMutations) {
-      console.info('ℹ️ Skipping dev alert email update (ALLOW_DEV_DB_MUTATIONS is not true)');
+      console.info('鈩癸笍 Skipping dev alert email update (ALLOW_DEV_DB_MUTATIONS is not true)');
     }
 
     initializeSocket(httpServer);
@@ -372,7 +379,7 @@ const startServer = async () => {
     try {
       await initJobFetcher();
     } catch (fetcherError) {
-      console.warn('⚠️ Job fetcher initialization skipped:', fetcherError.message);
+      console.warn('鈿狅笍 Job fetcher initialization skipped:', fetcherError.message);
     }
 
     try {
@@ -383,7 +390,7 @@ const startServer = async () => {
       scheduleWeeklyDigest();
     } catch (digestError) {
       console.warn(
-        '⚠️ Weekly digest scheduler initialization skipped:',
+        '鈿狅笍 Weekly digest scheduler initialization skipped:',
         digestError.message
       );
     }
@@ -391,11 +398,11 @@ const startServer = async () => {
     try {
       startOutreachWorker();
     } catch (outreachErr) {
-      console.warn('⚠️ Outreach worker initialization skipped:', outreachErr.message);
+      console.warn('鈿狅笍 Outreach worker initialization skipped:', outreachErr.message);
     }
 
   } catch (error) {
-    console.error('❌ Failed to start server:', error.message);
+    console.error('鉂?Failed to start server:', error.message);
     process.exit(1);
   }
 };
@@ -403,9 +410,9 @@ const startServer = async () => {
 startServer();
 
 const shutdown = async (signal) => {
-    console.log(`\n📥 Received ${signal}, shutting down gracefully...`);
+    console.log(`\n馃摜 Received ${signal}, shutting down gracefully...`);
     await redisManager.shutdown();
-    console.log('👋 Server shutdown complete');
+    console.log('馃憢 Server shutdown complete');
     process.exit(0);
 };
 
@@ -413,11 +420,11 @@ process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));
 
 process.on("unhandledRejection", (reason) => {
-  console.error("❌ UNHANDLED REJECTION:", reason);
+  console.error("鉂?UNHANDLED REJECTION:", reason);
 });
 
 process.on("uncaughtException", (err) => {
-  console.error("❌ UNCAUGHT EXCEPTION:", err);
+  console.error("鉂?UNCAUGHT EXCEPTION:", err);
   httpServer.close();
   redisManager.shutdown().finally(() => process.exit(1));
   setTimeout(() => process.exit(1), 10000).unref();
