@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import { summarizeJobDescription } from "../services/jobSummarizer.js";
 import { catchAsync } from "../middleware/globalErrorHandler.js";
 import { trackTokenUsage } from '../utils/tokenTracker.js';
+import { assertJobDescriptionWithinLimit } from '../utils/jobDescription.js';
 
 export const getJobs = catchAsync(async (req, res, next) => {
   const user = req.user;
@@ -80,12 +81,7 @@ export const summarizeJob = catchAsync(async (req, res, next) => {
     });
   }
 
-  if (jobDescription.length > 20000) {
-    return res.status(413).json({
-      success: false,
-      message: "Job description is too long"
-    });
-  }
+  assertJobDescriptionWithinLimit(jobDescription);
 
   const result = await summarizeJobDescription(jobDescription, req.aiProvider);
 
