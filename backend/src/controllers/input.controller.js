@@ -14,7 +14,20 @@ async function inputupload(req, res) {
       });   
     }
 
-    const parsedData = req.body.data ? JSON.parse(req.body.data) : {};
+    let parsedData = {};
+    if (req.body.data) {
+      if (typeof req.body.data === "string") {
+        try {
+          parsedData = JSON.parse(req.body.data);
+        } catch {
+          return res.status(400).json({
+            message: "Invalid JSON format in request body",
+          });
+        }
+      } else if (typeof req.body.data === "object") {
+        parsedData = req.body.data;
+      }
+    }
 
     let experienceLevel = "Entry";
 
